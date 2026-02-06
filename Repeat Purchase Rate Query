@@ -1,0 +1,23 @@
+CREATE OR REPLACE TABLE
+  `rakamin-data-science-486517.kimia_farma.repeat_purchase_rate` AS
+
+WITH customer_transaction AS (
+  SELECT
+    EXTRACT(YEAR FROM date) AS year,
+    customer_name,
+    COUNT(transaction_id) AS total_transaction
+  FROM `rakamin-data-science-486517.kimia_farma.tabel_analisa`
+  GROUP BY year, customer_name
+)
+
+SELECT
+  year,
+  COUNT(customer_name) AS total_customer,
+  SUM(CASE WHEN total_transaction > 1 THEN 1 ELSE 0 END) AS repeat_customer,
+  SAFE_DIVIDE(
+    SUM(CASE WHEN total_transaction > 1 THEN 1 ELSE 0 END),
+    COUNT(customer_name)
+  ) AS repeat_purchase_rate
+FROM customer_transaction
+GROUP BY year
+ORDER BY year;
